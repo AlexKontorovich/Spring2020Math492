@@ -1,0 +1,172 @@
+import tactic
+import data.nat.prime
+open classical 
+
+--Important theorems adapted from the Natural Number Game------------------------------
+theorem ge_iff_exists_add (a b: ℕ): a ≥ b ↔ ∃ (c: ℕ), a = b + c := sorry
+theorem g_iff_exists_add (a b: ℕ): a > b ↔ ∃ (c: ℕ) (c ≥ 1), a = b + c := sorry
+theorem my_simp (u v a : ℕ): u*v + (a*a + u*a) = a*u + (u*v + a*a):= sorry
+-----------------------------------------------------------------------------------------
+def dvd (m n: ℕ): Prop := ∃ k, n = m * k
+def prime (p : ℕ) : Prop := p ≥ 2 ∧ ∀ n, dvd n p → n = 1 ∨ n = p
+def composite (d : ℕ): Prop:= ¬ prime d
+
+theorem composite_fact (c: ℕ) : composite c ↔ ∃ (a b: ℕ), c = a*b ∧ a ≤ b ∧ prime a:= sorry
+
+theorem ge_refl(x : ℕ) : x ≥ x :=
+begin
+    rw ge_iff_exists_add,
+    use 0,
+    rw add_zero,
+end
+
+theorem ge_cancel (a b : ℕ) (ha : a*b ≥ a) (hb: a ≥ 1) : b ≥ 1 :=
+begin
+    rw ge_iff_exists_add at ha,
+    rw ge_iff_exists_add at hb,
+
+    cases ha with u hu,
+    cases hb with v hv,
+
+    rw ge_iff_exists_add,
+
+    ----more work needs to be done-------
+end
+
+theorem example1 (a b c :ℕ) (hba: b ≥ a) (hca: c ≥ a) : b*c ≥ a*a :=
+begin 
+    rw ge_iff_exists_add at hba,
+    rw ge_iff_exists_add at hca,
+
+    cases hba with u hu,
+    cases hca with v hv,
+
+    rw ge_iff_exists_add,
+    use a*v + a*u + u*v,
+
+    rw add_comm,
+    rw hv,
+    rw hu,
+    rw mul_add,
+    rw add_mul,
+    rw add_mul,
+    rw add_comm,
+    simp,
+    rw my_simp,
+end 
+
+-- Adapted from the Natural Number Game---
+lemma one_eq_succ_zero: 1 = nat.succ(0) := sorry --- Take this as definition and move on
+
+lemma succ_eq_add_one (n : ℕ) : nat.succ n = n + 1 := 
+begin
+    induction n with d hd,
+    rw zero_add,
+
+    rw hd,
+
+    --A little bit surprising Lean did this quickly. In the game it took me these lines:
+    --induction n with d hd,
+    --rw one_eq_succ_zero,
+    --rw zero_add,
+    --refl,
+
+    --rw hd,
+    --rw  ← succ_add,
+    --rw hd,
+    --refl,
+end
+----------------------------------------------------------------------
+lemma x_plus_stuff_plus_one_ge_x (x d : ℕ) : x + d + 1 ≥ x := 
+begin
+    rw ge_iff_exists_add,
+    use d+1,
+    rw add_assoc,
+end
+
+lemma my_lemma_helper (x y: ℕ) : y+x ≥ x := 
+begin 
+    induction y with d hd,
+    rw zero_add,
+    apply ge_refl,
+
+    rw add_comm,
+    rw nat.add_succ,
+    rw add_comm at hd,
+    rw succ_eq_add_one,
+    apply x_plus_stuff_plus_one_ge_x,
+end
+
+lemma my_lemma (c x : ℕ) (hab: c >= 1): c * x >= x := 
+begin 
+    rw ge_iff_exists_add at hab,
+    cases hab with d hd,
+    rw hd,
+    rw add_mul,
+    rw one_mul,
+    rw add_comm,
+    rw mul_comm,
+    apply my_lemma_helper,
+end
+
+theorem example2 (a b c : ℕ) (hba: c ≥ 1): a*b*c ≥ a*b := 
+begin
+    rw mul_comm,   
+    apply my_lemma,
+    exact hba, 
+end
+
+theorem example3 (a:ℕ) : ¬ a < a :=  
+begin
+    push_neg, 
+    apply le_iff_lt_or_eq.2, 
+    right,
+    refl,
+end
+
+theorem square_root_prime1 (n p : ℕ) (hn : n > 1) (hp : prime p ∧ dvd p n → p*p >  n) : ¬ composite  n :=
+begin
+  intro h,
+  rw composite_fact at h,
+  cases h with a ha,
+  cases ha with b hb,
+
+  have hbleft: n = a*b, from and.left hb,
+  have hbmidright: a ≤ b ∧ prime a, from and.right hb,
+  have hbright: prime a, from and.right hbmidright,
+  have hbmid: a ≤ b, from and.left hbmidright,
+
+  have hadn : dvd a n,
+
+  rw dvd,
+  use b,
+  rw hbleft,
+
+ --:= \<_, hbleft\>,
+  ---by_contradiction h,
+
+end
+
+lemma another_helper (u v : ℕ) : v ≤ u ↔ v*v ≤ v*u := sorry
+
+theorem square_root_prime2 (n : ℕ) (h1: composite n): ∃ (c d : ℕ), n = c*d ∧ c*c ≤ n :=
+begin 
+    rw composite_fact at h1,
+    cases h1 with v hv,
+    cases hv with u hu,
+    use v,
+    use u,
+    have hl: n = v*u, from and.left hu,
+    rw hl,
+
+    have hmr: v ≤ u ∧ prime v, from and.right hu,
+    have hr: prime v, from and.right hmr,
+    have hm: v ≤ u, from and.left hmr,
+
+    rw another_helper at hm, 
+
+    split,
+    refl,
+    apply hm,
+
+end
