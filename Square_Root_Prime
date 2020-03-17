@@ -159,8 +159,8 @@ begin
     have hl: n = v*u, from and.left hu,
     rw hl,
 
-    have hmr: v ≤ u ∧ prime v, from and.right hu,
-    have hr: prime v, from and.right hmr,
+    have hmr: v ≤ u ∧ u < n, from and.right hu,
+    have hr: u < n, from and.right hmr,
     have hm: v ≤ u, from and.left hmr,
 
     rw another_helper at hm, 
