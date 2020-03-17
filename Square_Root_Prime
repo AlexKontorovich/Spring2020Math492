@@ -11,7 +11,7 @@ def dvd (m n: ℕ): Prop := ∃ k, n = m * k
 def prime (p : ℕ) : Prop := p ≥ 2 ∧ ∀ n, dvd n p → n = 1 ∨ n = p
 def composite (d : ℕ): Prop:= ¬ prime d
 
-theorem composite_fact (c: ℕ) : composite c ↔ ∃ (a b: ℕ), c = a*b ∧ a ≤ b ∧ prime a:= sorry
+theorem composite_fact (c: ℕ) : composite c ↔ ∃ (a b: ℕ), c = a*b ∧ a ≤ b ∧ b < c:= sorry
 
 theorem ge_refl(x : ℕ) : x ≥ x :=
 begin
