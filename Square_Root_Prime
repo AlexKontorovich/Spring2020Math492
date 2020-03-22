@@ -9,9 +9,10 @@ begin
 end
 
 def greater (a b: ℕ): Prop := a ≥ b ∧ a ≠ b
+axiom zero (a : ℕ): a < 1 ↔ a =0
 
 theorem g_iff_exists_add (a b: ℕ): greater a b ↔ ∃ (c: ℕ), a = b + c ∧ c ≥ 1:= 
-begin
+begin                             --Perhaps a little bit overkill
     rw greater,
     rw ge_iff_exists_add,
     rw ne_from_not_eq,
@@ -29,8 +30,13 @@ begin
         apply hu,
 
         by_contradiction,
-        
-        sorry
+        push_neg at a_1,
+        rw zero at a_1,
+        subst a_1,
+        rw add_zero at hu,
+
+        have h_right: a ≠ b, from and.right h,
+        exact h_right hu,
     },
     {  intro h2,
 
