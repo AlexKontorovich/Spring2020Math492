@@ -3,15 +3,65 @@ import data.nat.prime
 open classical 
 
 --Important theorems adapted from the Natural Number Game------------------------------
-theorem ge_iff_exists_add (a b: ℕ): a ≥ b ↔ ∃ (c: ℕ), a = b + c := sorry
-theorem g_iff_exists_add (a b: ℕ): a > b ↔ ∃ (c: ℕ) (c ≥ 1), a = b + c := sorry
-theorem my_simp (u v a : ℕ): u*v + (a*a + u*a) = a*u + (u*v + a*a):= sorry
+theorem ge_iff_exists_add (a b: ℕ): a ≥ b ↔ ∃ (c: ℕ), a = b + c := 
+begin
+    apply le_iff_exists_add,  -- Ok, maybe this theorem was a little bit silly :)
+end
+
+def greater (a b: ℕ): Prop := a ≥ b ∧ a ≠ b
+
+theorem g_iff_exists_add (a b: ℕ): greater a b ↔ ∃ (c: ℕ), a = b + c ∧ c ≥ 1:= 
+begin
+    rw greater,
+    rw ge_iff_exists_add,
+    rw ne_from_not_eq,
+
+    split,
+
+    { intro h,
+        have h_left: ∃ (c : ℕ), a = b + c, from and.left h,
+        have h_right: ¬a = b, from and.right h,
+
+        cases h_left with u hu,
+        use u,
+
+        split,
+        apply hu,
+
+        by_contradiction,
+        
+        sorry
+    },
+    {  intro h2,
+
+        cases h2 with u hu,
+        have hu_left: a = b+u, from and.left hu,
+        split,
+        use u,
+        apply hu_left,
+
+        by_contradiction,
+        have wrong: a = b,
+        apply a_1,
+        
+        sorry
+        
+    }   
+
+end
+
+theorem my_simp (u v a : ℕ): u*v + (a*a + u*a) = a*u + (u*v + a*a):= 
+begin
+    rw ← add_assoc,
+    rw ← add_assoc,
+    rw add_comm,
+    simp,
+    rw mul_comm,
+end
 -----------------------------------------------------------------------------------------
 def dvd (m n: ℕ): Prop := ∃ k, n = m * k
 def prime (p : ℕ) : Prop := p ≥ 2 ∧ ∀ n, dvd n p → n = 1 ∨ n = p
-def composite (d : ℕ): Prop:= ¬ prime d
-
-theorem composite_fact (c: ℕ) : composite c ↔ ∃ (a b: ℕ), c = a*b ∧ a ≤ b ∧ b < c:= sorry
+def composite (d : ℕ): Prop:= ∃ (a b: ℕ), d = a*b ∧ a ≤ b ∧ b < d
 
 theorem ge_refl(x : ℕ) : x ≥ x :=
 begin
@@ -56,7 +106,10 @@ begin
 end 
 
 -- Adapted from the Natural Number Game---
-lemma one_eq_succ_zero: 1 = nat.succ(0) := sorry --- Take this as definition and move on
+lemma one_eq_succ_zero: 1 = nat.succ(0) := 
+begin
+    refl,
+end
 
 lemma succ_eq_add_one (n : ℕ) : nat.succ n = n + 1 := 
 begin
@@ -127,7 +180,7 @@ end
 theorem square_root_prime1 (n p : ℕ) (hn : n > 1) (hp : prime p ∧ dvd p n → p*p >  n) : ¬ composite  n :=
 begin
   intro h,
-  rw composite_fact at h,
+  rw composite at h,
   cases h with a ha,
   cases ha with b hb,
 
@@ -147,11 +200,25 @@ begin
 
 end
 
-lemma another_helper (u v : ℕ) : v ≤ u ↔ v*v ≤ v*u := sorry
+lemma another_helper (u v : ℕ) : v ≤ u ↔ v*v ≤ v*u := 
+begin
+    cases v,
+  { split,
+    { intro h,
+      simp,
+    },
+    intro, exact zero_le u,
+  },
+  {
+    symmetry,
+    apply mul_le_mul_left,
+    simp,
+  }
+end
 
 theorem square_root_prime2 (n : ℕ) (h1: composite n): ∃ (c d : ℕ), n = c*d ∧ c*c ≤ n :=
 begin 
-    rw composite_fact at h1,
+    rw composite at h1,
     cases h1 with v hv,
     cases hv with u hu,
     use v,
