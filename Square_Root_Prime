@@ -1,6 +1,20 @@
 import tactic
 import data.nat.prime
+import data.int.basic
 open classical 
+-- HUMAN PROOF 1:
+--Claim: Let n > 1. If n has no positive PRIME factor less ≤ sqrt(n), then n is prime
+-- Proof by Contradiction: 
+-- Suppose n is not prime. Then n has atleast two positive prime factors p1 and p2 such that 
+-- n = p1p2*k for some positive integer k. By hypothesis p1 and p2 are > sqrt(n). Then 
+-- n = p1p2*k ≥ p1p2 > n, and so n > n. Contradiction 
+
+-- HUMAN PROOF 2:
+-- Claim: Let n > 1. If n has no positive PROPER factor less ≤ sqrt(n), then n is prime
+-- Proof my Contrapositive:
+-- Suppose that n is composite. Then n = a*b where a ≤ b and b < n. Hence a^2 ≤ ab = n. 
+-- Hence a ≤ sqrt(n). 
+
 
 --Important theorems adapted from the Natural Number Game------------------------------
 theorem ge_iff_exists_add (a b: ℕ): a ≥ b ↔ ∃ (c: ℕ), a = b + c := 
@@ -9,7 +23,8 @@ begin
 end
 
 def greater (a b: ℕ): Prop := a ≥ b ∧ a ≠ b
-axiom zero (a : ℕ): a < 1 ↔ a =0
+axiom zero (a : ℕ): a < 1 ↔ a =0 
+axiom zero2 (a u : ℕ): u + a = u ↔ a = 0
 
 theorem g_iff_exists_add (a b: ℕ): greater a b ↔ ∃ (c: ℕ), a = b + c ∧ c ≥ 1:= 
 begin                             --Perhaps a little bit overkill
@@ -47,11 +62,11 @@ begin                             --Perhaps a little bit overkill
         apply hu_left,
 
         by_contradiction,
-        have wrong: a = b,
-        apply a_1,
-        
-        sorry
-        
+        subst hu_left,
+        rw zero2 at a_1,
+        rw ← zero at a_1,
+        have hu_right: u ≥ 1, from and.right hu,
+        linarith,  -- Thanks Olu :)
     }   
 
 end
@@ -86,7 +101,7 @@ begin
 
     rw ge_iff_exists_add,
 
-    ----more work needs to be done-------
+    ----more work needs to be done... but thankfully I dont need it :)-------
 end
 
 theorem example1 (a b c :ℕ) (hba: b ≥ a) (hca: c ≥ a) : b*c ≥ a*a :=
@@ -114,7 +129,7 @@ end
 -- Adapted from the Natural Number Game---
 lemma one_eq_succ_zero: 1 = nat.succ(0) := 
 begin
-    refl,
+    refl,   -- OK maybe a little bit silly :)
 end
 
 lemma succ_eq_add_one (n : ℕ) : nat.succ n = n + 1 := 
@@ -137,6 +152,7 @@ begin
 end
 ----------------------------------------------------------------------
 lemma x_plus_stuff_plus_one_ge_x (x d : ℕ) : x + d + 1 ≥ x := 
+-- Helps to prove my_lemma_helper
 begin
     rw ge_iff_exists_add,
     use d+1,
@@ -181,10 +197,12 @@ begin
     apply le_iff_lt_or_eq.2, 
     right,
     refl,
+    -- This should help with the contradiction
 end
 
 theorem square_root_prime1 (n p : ℕ) (hn : n > 1) (hp : prime p ∧ dvd p n → p*p >  n) : ¬ composite  n :=
 begin
+--HUMAN PROOF 1 in Code :(
   intro h,
   rw composite at h,
   cases h with a ha,
@@ -200,6 +218,7 @@ begin
   rw dvd,
   use b,
   rw hbleft,
+
 
  --:= \<_, hbleft\>,
   ---by_contradiction h,
@@ -223,6 +242,7 @@ begin
 end
 
 theorem square_root_prime2 (n : ℕ) (h1: composite n): ∃ (c d : ℕ), n = c*d ∧ c*c ≤ n :=
+-- HUMAN PROOF 2 in Code :)
 begin 
     rw composite at h1,
     cases h1 with v hv,
