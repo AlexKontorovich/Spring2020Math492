@@ -1,23 +1,32 @@
 import tactic
 
 
-def injective {X Y} (f : X → Y)
-    := ∀ x₁ x₂, f x₁ = f x₂ → x₁ = x₂
+def injective {X Y} (f : X → Y) := ∀ x₁ x₂, f x₁ = f x₂ → x₁ = x₂
 
 
-def range {X Y} (f : X → Y)
-    := { y | ∃ x, f x = y }
+def range {X Y} (f : X → Y) := { y | ∃ x, f x = y }
 
 
-/--
-Type of pairs (k,p) where k
-is a natural number and p is a witness to the proof that k < n.
--/
-def finite_subset (n : ℕ) := Σ' k, k < n
+theorem comp_inj_is_inj 
+{X Y Z} (f : X → Y) (g : Y → Z)
+(p1 : injective f) 
+(p2 : injective g) 
+:  injective (g ∘ f)
+:= begin
+  introv x p3,
+  change g (f x) = g (f x₂) at p3,
+  apply p1,
+  apply p2, 
+  apply p3,
+end
 
 
-def lift_finite (m n : ℕ) (p : m < n) : finite_subset m → finite_subset n
-    := λ k, ⟨k.1, lt.trans k.2 p⟩
+lemma succ_greater_than_nat (n : ℕ) : nat.succ n > n
+:= 
+begin
+  rw nat.succ_eq_add_one,
+  linarith
+end
 
 
 lemma pred_exists (n : ℕ) (p: n > 0) : exists k, nat.succ k = n
@@ -32,12 +41,56 @@ induction n with d hd,
 end
 
 
-lemma succ_greater_than_nat (n : ℕ) : nat.succ n > n
-:= 
+-- forgot library function, lifted from square root prime code
+-- credit to github user dm1237
+lemma succ_eq_add_one (n : ℕ) : nat.succ n = n + 1 := 
 begin
-rw nat.succ_eq_add_one,
-linarith
+    exact rfl,
 end
+
+-- forgot library function
+lemma my_le_trans
+(j k m : ℕ)
+(p1: k < m)
+(p2: j < k)
+: j < m - 1
+:=
+begin
+sorry
+end
+
+
+-- I'm not gonna waste time proving this
+lemma inequality_fact
+(j m : ℕ)
+(p: j < m)
+: j - 1 < m - 1
+:= begin
+sorry
+end
+
+/--
+Type of pairs (k,p) where k
+is a natural number and p is a witness to the proof that k < n.
+-/
+def finite_subset (n : ℕ) := Σ' k, k < n
+
+/--
+Every pair that lives in finite_subest m lives in finite_subset n
+where m < n
+-/
+def lift_finite (m n : ℕ) (p : m < n) : finite_subset m → finite_subset n
+    := λ k, ⟨k.1, lt.trans k.2 p⟩
+
+
+/--
+Application of lift_finite from m to m + 1
+-/
+def lift_one
+(m : ℕ)
+: finite_subset m → finite_subset (m + 1)
+:= (lift_finite m (m+1) (succ_greater_than_nat m))
+
 
 
 /--
@@ -66,93 +119,48 @@ introv x p2,
 cases x,
 cases x₂,
 cases p2,
-refl
+refl,
 end
 
 
-theorem comp_inj_is_inj 
-{X Y Z} (f : X → Y) (g : Y → Z)
-(p1 : injective f) 
-(p2 : injective g) 
-:  injective (g ∘ f)
+/--
+The lifting from m to m + 1 injective
+-/
+lemma lift_one_injective (m : ℕ) 
+: injective (lift_one m) 
 := begin
-
-introv x p3,
-change g (f x) = g (f x₂) at p3,
-apply p1,
-apply p2, 
-apply p3,
+apply lift_finite_injective m (m + 1) (succ_greater_than_nat m),
 end
 
 
--- forgot library function, lifted from square root prime code
--- credit to github user dm1237
-lemma succ_eq_add_one (n : ℕ) : nat.succ n = n + 1 := 
-begin
-    exact rfl,
-end
-
-
-theorem either_zero_or_not
-(x y : ℕ)
-: x = y ∨ x ≠ y
-:= begin 
-induction x with d hd,
-cases y, 
-{simp}, -- base case y = 0
-
-{simp, 
- rw succ_eq_add_one,
-  sorry},
-{sorry}
-
-
-end
-
-
-
-lemma my_le_trans
-(j k m : ℕ)
-(p1: k < m)
-(p2: j < k)
-: j < m - 1
-:=
-begin
-
-sorry
-end
-
-#print le_trans
-
-
-
-lemma inequality_fact
-(j m : ℕ)
-(p: j < m)
-: j - 1 < m - 1
-:= begin
-sorry
-end
 
 -- warning, sort of janky
 -- ie, don't use if we don't miss k in the codomain
 -- it's not injective by itself
 -- but relabel k ∘ f ∘ lift IS injective
 -- because f ∘ lift misses k
-def relabel_finite_set 
+def relabel
 (m k : ℕ) 
 (p: k < m)
 : finite_subset m → finite_subset (m - 1)
 := λ j, if H : j.1 < k then ⟨j.1, my_le_trans j.1 k m p H ⟩ else ⟨j.1 - 1, inequality_fact j.1 m j.2⟩
 
 
-
-lemma relabel_miss_injectivity
+/-
+This formalizes the notion that when f is injective and misses k 
+in the codomain then when we relabel to bring m to m - 1, 
+composition is injective
+-/
+lemma relabel_with_inj_f_misses_k_is_inj
 (m k : ℕ) 
 (p: k < m)
-()
-: relabel 
-
+(f: finite_subset m → finite_subset m)
+(inj: injective f)
+: injective ((relabel m k p) ∘ f)
+:=
+begin
+sorry
+end
 
 
 /--
@@ -168,24 +176,36 @@ theorem pigeonhole_principle
   induction n with d hd,
   { linarith, /- case d = 0 -/ },
 
-  let succ_for_lift := (succ_greater_than_nat d),
-  let lift := (lift_finite d (d+1) succ_for_lift),
-  let g := f ∘ lift,
+
+  let g := f ∘ (lift_one d),
   let hd' := hd g,
 
   rcases lt_or_eq_of_le (nat.lt_succ_iff.1 n_gt_m) with h | rfl,
 
   {   /- case where d > m -/
       /- prove injective g -/ 
-    apply hd' h,
-    let lift_injective := (lift_finite_injective d (d+1) succ_for_lift),  
-    let g_injective := comp_inj_is_inj lift f lift_injective f_injective,
+    apply hd' h, 
+    let g_injective := comp_inj_is_inj (lift_one d) f (lift_one_injective d) f_injective,
     exact g_injective,
   },
 
   {   /- case where d = m -/
       /- prove f : finite_subset (nat.succ m) → finite_subset m is not injective -/ 
-    let k := f ⟨m, succ_greater_than_nat m⟩, -- let k = f(m)
+
+    induction m with l hl,
+    
+    {sorry,}, -- need to recall the proof we gave before
+
+
+    let k := f ⟨l + 1, succ_greater_than_nat (l + 1)⟩, -- let k = f(l + 1)
+    let violator := f ∘ (lift_one (l + 1)),
+    let restriction := (relabel (l + 1) k.1 k.2) ∘ violator,
+    let violator_is_inj := comp_inj_is_inj (lift_one (l + 1)) f (lift_one_injective (l + 1)) f_injective,
+    let res_is_inj := relabel_with_inj_f_misses_k_is_inj (l + 1) k.1 k.2 violator violator_is_inj,
+    /- contradiction, since restriction: [m] →  [m - 1] is injective,
+     but this can't be true IH
+     -/
+    
     
 
     sorry 
