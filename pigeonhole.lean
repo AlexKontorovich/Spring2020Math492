@@ -84,6 +84,77 @@ apply p2,
 apply p3,
 end
 
+
+-- forgot library function, lifted from square root prime code
+-- credit to github user dm1237
+lemma succ_eq_add_one (n : ℕ) : nat.succ n = n + 1 := 
+begin
+    exact rfl,
+end
+
+
+theorem either_zero_or_not
+(x y : ℕ)
+: x = y ∨ x ≠ y
+:= begin 
+induction x with d hd,
+cases y, 
+{simp}, -- base case y = 0
+
+{simp, 
+ rw succ_eq_add_one,
+  sorry},
+{sorry}
+
+
+end
+
+
+
+lemma my_le_trans
+(j k m : ℕ)
+(p1: k < m)
+(p2: j < k)
+: j < m - 1
+:=
+begin
+
+sorry
+end
+
+#print le_trans
+
+
+
+lemma inequality_fact
+(j m : ℕ)
+(p: j < m)
+: j - 1 < m - 1
+:= begin
+sorry
+end
+
+-- warning, sort of janky
+-- ie, don't use if we don't miss k in the codomain
+-- it's not injective by itself
+-- but relabel k ∘ f ∘ lift IS injective
+-- because f ∘ lift misses k
+def relabel_finite_set 
+(m k : ℕ) 
+(p: k < m)
+: finite_subset m → finite_subset (m - 1)
+:= λ j, if H : j.1 < k then ⟨j.1, my_le_trans j.1 k m p H ⟩ else ⟨j.1 - 1, inequality_fact j.1 m j.2⟩
+
+
+
+lemma relabel_miss_injectivity
+(m k : ℕ) 
+(p: k < m)
+()
+: relabel 
+
+
+
 /--
 Pigeonhole principle, induction on n
 -/
@@ -114,7 +185,9 @@ theorem pigeonhole_principle
 
   {   /- case where d = m -/
       /- prove f : finite_subset (nat.succ m) → finite_subset m is not injective -/ 
+    let k := f ⟨m, succ_greater_than_nat m⟩, -- let k = f(m)
     
+
     sorry 
   }
  
