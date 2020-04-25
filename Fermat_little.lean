@@ -68,3 +68,5 @@ begin
 
 end
 
+--bad definition
+def rsc (n: nat) := {k: nat| k<n ∧ k.coprime n}
