@@ -70,3 +70,7 @@ end
 
 --bad definition
 def rsc (n: nat) := {k: nat| k<n ∧ k.coprime n}
+
+-- Zulip definition for residue class --
+example (n : ℕ+) : units (zmod n) ≃ {x : zmod n // nat.coprime x.val n} :=
+zmod.units_equiv_coprime
