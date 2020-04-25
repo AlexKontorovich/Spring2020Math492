@@ -9,7 +9,8 @@ def is_congruent_mod_n (a b n: ℤ) := divides n (b-a)
 def relatively_prime(a b:ℤ) := ∀l:ℤ, ¬(divides l a) ∨ ¬(divides l b)
 
 theorem relatively_prime_sum_to_one (a b : ℤ) (h : relatively_prime a b) : 
-∃ m n: ℤ, m* a + n * b = 1 := sorry
+∃ m n: ℤ, m* a + n * b = 1 := 
+by library_search,
 
 --helper theorem that is not true :(--
 -- the iff is not true, but I can't use it without it--
@@ -66,68 +67,4 @@ begin
   },
 
 end
-
-
--- residue class --
-def reduced_residue_class (n : nat) : finset nat := 
-(finset.range n).filter $ assume k, k.coprime n
-
-def prod_rsc (n) : nat := (reduced_residue_class n).prod id
-
--- not scaled :( --
-def scaled_residue_class (a n: nat): finset nat :=
-(finset.range n).filter $ assume k, k.coprime n
-
-def prod_scaled_rsc (a n: nat): nat := (scaled_residue_class a n).prod id
-
---congruence of residue classes --
-theorem congruent_residue_classes(a n: nat)(c:a.coprime n): 
-is_congruent_mod_n (prod_rsc n)(prod_scaled_rsc a n) n:= sorry
-
-
-
---Zulip proof of Bézout 
-lemma bezout (a : ℕ) (b : ℕ) (ha : a ≥ 1) (hb : b ≥ 1) (h : nat.gcd a b = 1) :
-    ∃ x : ℕ, ∃ y : ℕ, a*x + 1 = b*y :=
-begin
-  let k := max (int.nat_abs (nat.gcd_a a b)) (int.nat_abs (nat.gcd_b a b)) + 1,
-  let x : ℤ := b*k - nat.gcd_a a b,
-  let y : ℤ := a*k + nat.gcd_b a b,
-  refine ⟨int.to_nat x, int.to_nat y, int.coe_nat_inj _⟩,
-  suffices : (a * int.to_nat x + 1 : ℤ) = b * int.to_nat y, {simpa},
-  have k1 : 1 ≤ k := nat.le_add_left _ _,
-  have ha' : (1:ℤ) ≤ a := int.coe_nat_le.2 ha,
-  have hb' : (1:ℤ) ≤ b := int.coe_nat_le.2 hb,
-  have x0 : 0 ≤ x,
-  { refine sub_nonneg.2 _,
-    have := mul_le_mul_of_nonneg_right hb' (int.coe_nat_nonneg k),
-    rw one_mul at this,
-    refine le_trans (le_trans int.le_nat_abs _) this,
-    refine int.coe_nat_le.2 _,
-    exact nat.le_succ_of_le (le_max_left _ _) },
-  have y0 : 0 ≤ y,
-  { refine sub_le_iff_le_add.1 _,
-    rw zero_sub,
-    have := mul_le_mul_of_nonneg_right ha' (int.coe_nat_nonneg k),
-    rw one_mul at this,
-    refine le_trans (le_trans int.le_nat_abs _) this,
-    rw [int.nat_abs_neg, int.coe_nat_le],
-    exact nat.le_succ_of_le (le_max_right _ _) },
-  rw [int.to_nat_of_nonneg x0, int.to_nat_of_nonneg y0],
-  have := nat.gcd_eq_gcd_ab a b,
-  rw [h, int.coe_nat_one] at this,
-  rw [this, mul_sub, ← add_assoc, sub_add_cancel, mul_left_comm, ← mul_add],
-end
-
-
-
--- alternative definitions of residue classes --
-
--- lean definition for residue class --
-example (n : ℕ+) : units (zmod n) ≃ {x : zmod n // nat.coprime x.val n} :=
-zmod.units_equiv_coprime
-
--- lean doesn't know if this is finite 
-def rsc (n: nat) := {k: nat| k<n ∧ k.coprime n}
-
 
