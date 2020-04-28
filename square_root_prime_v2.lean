@@ -129,6 +129,7 @@ begin
   rintro rfl, refl,
 end
 
+--- The grand unification lemma ----
 lemma either_prime_or_composite (n:ℕ ) (ge: n≥ 2): (¬ (prime n) ↔ composite n) :=
 begin
     split,
@@ -284,30 +285,46 @@ begin
                 have hn: n ≠ 0,
                 {
                     exact lattice.ne_bot_of_gt ge,
-                }
-            
-                --apply dvd_n_less_than_n, I have the lemma proved above but can't use it
+                },
                 
+                apply dvd_n_less_than_n,
+                have h4: dvd u n, from and.left hu,
+                apply h4,
+                apply hb,
+                apply hc,
+                apply hn,  
             },
 
-
-            split,
-            exact hk,
-
-            split,
-
-            have h3: u ≠ 1, from and.left h2,
-            refl,
-
-            --apply dvd_n_less_than_n, I have the lemma proved above but can't use it
-
         }
+        
     },
     {
+      intros h,
+      rw composite at h,
+      by_contradiction,
+      rw prime at a,
 
-    }
+      cases h with a1 ha1,
+      cases ha1 with b hb,
+      
+      have h1: n = a1*b, from and.left hb,
+      have temp: a1 ≤ b ∧ b < n, from and.right hb,
+      have h2: a1 ≤ b, from and.left temp,
+      have h3: b < n, from and.right temp,
+
+      have hc := a.right b,
+
+      have b_isnt_one: b ≠ 1,
+      {
+        by_contradiction,
+        push_neg at a_1,
+        subst a_1,
+        rw mul_one at h1,
+        linarith,
+      },
+       ---Some parts left ---
+    },
 end
-
 
 theorem ge_refl(x : ℕ) : x ≥ x :=
 begin
