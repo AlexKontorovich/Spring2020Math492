@@ -322,9 +322,31 @@ begin
         rw mul_one at h1,
         linarith,
       },
-       ---Some parts left ---
+     
+      have b_divides_n: dvd b n,
+      {
+          rw dvd,
+          rw mul_comm at h1,
+          use a1,
+          rw h1,
+      },
+
+      have b_is_trivial: b = 1 ∨ b = n,
+      {
+        exact hc b_divides_n,
+      },
+
+      cases b_is_trivial,
+      {
+          exact b_isnt_one b_is_trivial,
+      },
+      {
+          linarith,
+      },
+
     },
 end
+
 
 theorem ge_refl(x : ℕ) : x ≥ x :=
 begin
@@ -406,30 +428,6 @@ begin
 -/
 end
 
-theorem square_root_prime1 (n p : ℕ) (hn : n > 1) (hp : prime p ∧ dvd p n → p*p >  n) : ¬ composite  n :=
-begin
---HUMAN PROOF 1 in Code :(
-  intro h,
-  rw composite at h,
-  cases h with a ha,
-  cases ha with b hb,
-
-  have hbleft: n = a*b, from and.left hb,
-  have hbmidright: a ≤ b ∧ prime a, from and.right hb,
-  have hbright: prime a, from and.right hbmidright,
-  have hbmid: a ≤ b, from and.left hbmidright,
-
-  have hadn : dvd a n,
-
-  rw dvd,
-  use b,
-  rw hbleft,
-
-
- --:= \<_, hbleft\>,
-  ---by_contradiction h,
-
-end
 
 lemma another_helper (u v : ℕ) : v ≤ u ↔ v*v ≤ v*u := 
 begin
