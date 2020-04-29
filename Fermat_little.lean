@@ -1,20 +1,45 @@
 import data.nat.gcd
 import algebra.big_operators
+import data.int.gcd
+import algebra.euclidean_domain
 
-
-import data.zmod.basic
 
 def divides (d n: ℤ):=  ∃l:ℤ, n = d*l
 def is_congruent_mod_n (a b n: ℤ) := divides n (b-a)
-def relatively_prime(a b:ℤ) := ∀l:ℤ, ¬(divides l a) ∨ ¬(divides l b)
+def relatively_prime(a b:ℤ) :=  nat.coprime (int.nat_abs a) (int.nat_abs b)
+
+--def relatively_prime(a b:ℤ) := ∀l:ℤ,  ¬(divides l a) ∨ ¬(divides l b)
 
 theorem relatively_prime_sum_to_one (a b : ℤ) (h : relatively_prime a b) : 
-∃ m n: ℤ, m* a + n * b = 1 := 
-by library_search,
+∃ m n: ℤ, m* a + n * b = 1 :=  
+begin
+  existsi [int.sign a * nat.gcd_a (int.nat_abs a) (int.nat_abs b),
+           int.sign b * nat.gcd_b (int.nat_abs a) (int.nat_abs b)],
+  rw [mul_right_comm, mul_comm _ a, int.mul_sign,
+      mul_right_comm, mul_comm _ b, int.mul_sign,
+      ← nat.gcd_eq_gcd_ab,
+      show nat.gcd (int.nat_abs a) (int.nat_abs b) = 1, from h,
+      int.coe_nat_one],
+end
 
---helper theorem that is not true :(--
--- the iff is not true, but I can't use it without it--
+
 theorem divides_in_product (a b c: ℤ): a*b = c ↔ divides a c:= sorry
+  begin
+    split,
+    {
+      intros,
+      rw divides,
+      cases a_1 with ell,
+      --by library_search,
+      exact Exists.intro ell (eq.symm a_1_h),
+    },
+    {
+      intros,
+      cases a_1 with ell,
+      --by library_search,
+      exact Exists.intro ell (eq.symm a_1_h),
+    },
+  end
 
 --Generalized Euclid Lemma --
 theorem divides_product_coprime_and_not_coprime (a b n:ℤ) (c: divides n (a*b))
@@ -44,20 +69,20 @@ begin
   rw [mul_left_comm] at this,
   rw <- mul_add at this,
 
-  rw divides_in_product n (q*b+l*m) b at this, -- can use "apply" instead and get rid of iff
+  rw divides_in_product n (q*b+l*m) b at this, -- can use "apply" instead and get rid of if
   apply this,
 
 end
 
 
 theorem cancel_out_mod_n (a b c n: ℤ) (p: is_congruent_mod_n (a*b) (a*c) n)
-(q: relatively_prime a n) : is_congruent_mod_n b c n :=
+(q: relatively_prime a n): is_congruent_mod_n b c n :=
 
 begin
   cases p with j k,
-  rw <-mul_sub at k,  --does not work if I convert to naturals
+  rw <-mul_sub at k,  
   rw eq_comm at k,
-  rw divides_in_product n j (a*(c-b)) at k,  -- cannot use "apply" and get rid of iff
+  rw divides_in_product n j (a*(c-b)) at k,  
   apply divides_product_coprime_and_not_coprime a (c-b) n,
   {
     apply k,
@@ -67,10 +92,3 @@ begin
   },
 
 end
-
---bad definition
-def rsc (n: nat) := {k: nat| k<n ∧ k.coprime n}
-
--- Zulip definition for residue class --
-example (n : ℕ+) : units (zmod n) ≃ {x : zmod n // nat.coprime x.val n} :=
-zmod.units_equiv_coprime
