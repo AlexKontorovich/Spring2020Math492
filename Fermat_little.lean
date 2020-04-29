@@ -2,7 +2,7 @@ import data.nat.gcd
 import algebra.big_operators
 import data.int.gcd
 import algebra.euclidean_domain
-
+import data.zmod.basic
 
 def divides (d n: ℤ):=  ∃l:ℤ, n = d*l
 def is_congruent_mod_n (a b n: ℤ) := divides n (b-a)
@@ -23,21 +23,20 @@ begin
 end
 
 
-theorem divides_in_product (a b c: ℤ): a*b = c ↔ divides a c:= sorry
+theorem divides_in_product (a b c: ℤ): a*b = c ↔ divides a c:= 
   begin
     split,
     {
       intros,
       rw divides,
       cases a_1 with ell,
-      --by library_search,
-      exact Exists.intro ell (eq.symm a_1_h),
+      exact Exists.intro b rfl,
     },
     {
       intros,
       cases a_1 with ell,
-      --by library_search,
-      exact Exists.intro ell (eq.symm a_1_h),
+      by library_search,
+      --exact Exists.intro ell (eq.symm a_1_h),
     },
   end
 
@@ -52,7 +51,7 @@ begin
   cases h with q manb_eq_one,
   
   -- multiplies both sides by b
-  have := congr_arg (has_mul.mul b) manb_eq_one, -- does not work if I covert to naturals
+  have := congr_arg (has_mul.mul b) manb_eq_one, 
   rw [mul_one] at this,
   -- this : b * (m * a + q * n) = b
 
@@ -69,7 +68,7 @@ begin
   rw [mul_left_comm] at this,
   rw <- mul_add at this,
 
-  rw divides_in_product n (q*b+l*m) b at this, -- can use "apply" instead and get rid of if
+  rw divides_in_product n (q*b+l*m) b at this, 
   apply this,
 
 end
@@ -92,3 +91,6 @@ begin
   },
 
 end
+
+
+
