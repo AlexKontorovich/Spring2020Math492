@@ -8,8 +8,6 @@ def divides (d n: ℤ):=  ∃l:ℤ, n = d*l
 def is_congruent_mod_n (a b n: ℤ) := divides n (b-a)
 def relatively_prime(a b:ℤ) :=  nat.coprime (int.nat_abs a) (int.nat_abs b)
 
---def relatively_prime(a b:ℤ) := ∀l:ℤ,  ¬(divides l a) ∨ ¬(divides l b)
-
 theorem relatively_prime_sum_to_one (a b : ℤ) (h : relatively_prime a b) : 
 ∃ m n: ℤ, m* a + n * b = 1 :=  
 begin
