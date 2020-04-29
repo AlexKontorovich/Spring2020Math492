@@ -115,6 +115,21 @@ def dvd (m n: ℕ): Prop := ∃ k, n = m * k
 def prime (p : ℕ) : Prop := p ≥ 2 ∧ ∀ n, dvd n p → n = 1 ∨ n = p
 def composite (d : ℕ): Prop:= ∃ (a b: ℕ), d = a*b ∧ a ≤ b ∧ b < d
 
+lemma greater_than_not_zero (n : ℕ)(n ≥ 2): n ≠ 0:=
+begin
+    exact lattice.ne_bot_of_gt H,
+end
+
+lemma dvd_n_less_than_n (u n : ℕ) (ha: dvd u n) (hb: u ≠ 1) (hc: u ≠ n) (hn : n ≠ 0) : u < n :=
+begin
+  refine lt_of_le_of_ne _ hc,
+  rcases ha with ⟨k, rfl⟩,
+  simpa using nat.mul_le_mul_left _ (_:1≤_),
+  refine nat.pos_iff_ne_zero.2 (mt _ hn),
+  rintro rfl, refl,
+end
+
+--- The grand unification lemma ----
 lemma either_prime_or_composite (n:ℕ ) (ge: n≥ 2): (¬ (prime n) ↔ composite n) :=
 begin
     split,
@@ -206,9 +221,10 @@ begin
                 use k,
                 use u,
                 split,
+                rw mul_comm at hk,
                 exact hk,
                 split,
-                exact u_g_k,
+                --exact u_g_k,
 
                 let hu_mid:= hu.2.1,
 
@@ -261,48 +277,68 @@ begin
                     linarith,
                 },
                 linarith,
-                   
-
+                
+                have ha: dvd u n, from and.left hu,
+                have h2: u ≠ 1 ∧ u ≠ n, from and.right hu,
+                have hc: u ≠ n, from and.right h2,
+                have hb: u ≠ 1, from and.left h2,
+                have hn: n ≠ 0,
+                {
+                    exact lattice.ne_bot_of_gt ge,
+                },
+                
+                apply dvd_n_less_than_n,
+                have h4: dvd u n, from and.left hu,
+                apply h4,
+                apply hb,
+                apply hc,
+                apply hn,  
             },
 
-
-            split,
-            exact hk,
-
-            split,
-
-
         }
+        
     },
     {
+      intros h,
+      rw composite at h,
+      by_contradiction,
+      rw prime at a,
 
-    }
+      cases h with a1 ha1,
+      cases ha1 with b hb,
+      
+      have h1: n = a1*b, from and.left hb,
+      have temp: a1 ≤ b ∧ b < n, from and.right hb,
+      have h2: a1 ≤ b, from and.left temp,
+      have h3: b < n, from and.right temp,
+
+      have hc := a.right b,
+
+      have b_isnt_one: b ≠ 1,
+      {
+        by_contradiction,
+        push_neg at a_1,
+        subst a_1,
+        rw mul_one at h1,
+        linarith,
+      },
+       ---Some parts left ---
+    },
 end
-
 
 theorem ge_refl(x : ℕ) : x ≥ x :=
 begin
     linarith,
 
---    rw ge_iff_exists_add,
- --   use 0,
-   -- rw add_zero,
+--    
 end
 
 theorem ge_cancel (a b : ℕ) (ha : a*b ≥ a) (hb: a ≥ 1) : b ≥ 1 :=
 begin
     by library_search,
---    exact (le_mul_iff_one_le_right hb).mp ha,
+--exact (le_mul_iff_one_le_right hb).mp ha,
 
---    rw ge_iff_exists_add at ha,
---    rw ge_iff_exists_add at hb,
 
---    cases ha with u hu,
---    cases hb with v hv,
-
- --   rw ge_iff_exists_add,
-
-    ----more work needs to be done... but thankfully I dont need it :)-------
 end
 
 theorem example1 (a b c :ℕ) (hba: b ≥ a) (hca: c ≥ a) : b*c ≥ a*a :=
@@ -310,24 +346,7 @@ begin
     exact canonically_ordered_semiring.mul_le_mul hba hca,
 --    by library_search,
 /-
-    rw ge_iff_exists_add at hba,
-    rw ge_iff_exists_add at hca,
-
-    cases hba with u hu,
-    cases hca with v hv,
-
-    rw ge_iff_exists_add,
-    use a*v + a*u + u*v,
-
-    rw add_comm,
-    rw hv,
-    rw hu,
-    rw mul_add,
-    rw add_mul,
-    rw add_mul,
-    rw add_comm,
-    simp,
-    rw my_simp,
+    
 -/
 end 
 
@@ -342,21 +361,7 @@ begin
     exact rfl,
 --    by library_search,
 
---    induction n with d hd,
---    rw zero_add,
-
---    rw hd,
-
-    --A little bit surprising Lean did this quickly. In the game it took me these lines:
-    --induction n with d hd,
-    --rw one_eq_succ_zero,
-    --rw zero_add,
-    --refl,
-
-    --rw hd,
-    --rw  ← succ_add,
-    --rw hd,
-    --refl,
+--    
 end
 ----------------------------------------------------------------------
 lemma x_plus_stuff_plus_one_ge_x (x d : ℕ) : x + d + 1 ≥ x := 
@@ -364,24 +369,14 @@ lemma x_plus_stuff_plus_one_ge_x (x d : ℕ) : x + d + 1 ≥ x :=
 begin
     linarith,
 /-
-    rw ge_iff_exists_add,
-    use d+1,
-    rw add_assoc,
+   
 -/
 end
 
 lemma my_lemma_helper (x y: ℕ) : y+x ≥ x := 
 begin 
     linarith,
-/-    induction y with d hd,
-    rw zero_add,
-    apply ge_refl,
-
-    rw add_comm,
-    rw nat.add_succ,
-    rw add_comm at hd,
-    rw succ_eq_add_one,
-    apply x_plus_stuff_plus_one_ge_x,
+/-    
 -/
 end
 
@@ -390,14 +385,7 @@ begin
     exact nat.le_mul_of_pos_left hab,
 --    by library_search,
 /-
-    rw ge_iff_exists_add at hab,
-    cases hab with d hd,
-    rw hd,
-    rw add_mul,
-    rw one_mul,
-    rw add_comm,
-    rw mul_comm,
-    apply my_lemma_helper,
+    
 -/
 end
 
@@ -406,9 +394,7 @@ begin
     exact nat.le_mul_of_pos_right hba,
 --    by library_search,
 /-
-    rw mul_comm,   
-    apply my_lemma,
-    exact hba, 
+    
 -/
 end
 
@@ -416,11 +402,7 @@ theorem example3 (a:ℕ) : ¬ a < a :=
 begin
     linarith,
 /-
-    push_neg, 
-    apply le_iff_lt_or_eq.2, 
-    right,
-    refl,
-    -- This should help with the contradiction
+    
 -/
 end
 
