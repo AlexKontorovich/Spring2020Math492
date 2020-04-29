@@ -35,33 +35,70 @@ begin
 end
 
 
-/-
+lemma ge_zero_witness_k
+(n k : ℕ )
+(p : k ≥ 0)
+(p2 : n > k)
+: n > 0
+:=
+begin
+exact lt_of_le_of_lt p p2,
+end
+
+
+lemma ge_zero
+(k : ℕ)
+: k ≥ 0
+:= begin
+exact bot_le,
+end
+
+lemma minus_one_both_sides_eq
+{n m k : ℕ }
+(p : k ≥ 0)
+(p2 : m > k)
+(p3 : n > k)
+(p4: m - 1 = n - 1)
+: m = n 
+:=
+begin
+have m_ge_zero  := (ge_zero_witness_k m k p p2),
+have n_ge_zero := (ge_zero_witness_k n k p p3), 
+exact nat.pred_inj m_ge_zero n_ge_zero p4,
+end
+
+
+
 lemma my_le_trans
 (j k m : ℕ)
 (p1: k < m)
 (p2: j ≤ k)
+(p3 m > 0)
 : j < m - 1
 :=
 begin
   intros,
+  
+  /-
   induction j with d hd, 
   {
     induction m with dm hdm,
     {exact lt_of_le_of_lt p2 p1},
     {
-      sorry,
+      
     }
   },
   {
     induction m with dm hdm,
     {linarith,},
     {
-      sorry,
+      
     }
   },
-  
+  -/
+  sorry,
 end
--/
+
 
 
 lemma downward_ineq
@@ -157,36 +194,21 @@ end
 
 
 
-lemma ge_zero_witness_k
-(n k : ℕ )
-(p : k ≥ 0)
-(p3 : n > k)
-: n > 0
-:=
+/--
+Small proof of the `j.1 < m - 1` in the `then` case below.
+-/
+lemma relabel_inequality_lower_case
+(m k : ℕ) 
+(h : k < m) 
+(j : finite_subset m) 
+(p : j.1 ≤ k)
+: j.1 < m - 1
+:= 
 begin
-exact lt_of_le_of_lt p p3,
-end
-
-
-lemma ge_zero
-(k : ℕ)
-: k ≥ 0
-:= begin
-exact bot_le,
-end
-
-lemma minus_one_both_sides_eq
-{n m k : ℕ }
-(p : k ≥ 0)
-(p2 : m > k)
-(p3 : n > k)
-(p4: m - 1 = n - 1)
-: m = n 
-:=
-begin
-have m_ge_zero  := (ge_zero_witness_k m k p p2),
-have n_ge_zero := (ge_zero_witness_k n k p p3), 
-exact nat.pred_inj m_ge_zero n_ge_zero p4,
+let witness := (ge_zero_witness_k m k (ge_zero k) h),
+let reason := my_le_trans j.1 k m h p m m witness, 
+apply reason, 
+apply witness, 
 end
 
 /--
@@ -201,7 +223,7 @@ def relabel
 : finite_subset (m - 1) 
 :=
   if H : j.1 ≤ k 
-  then ⟨j.1, sorry⟩ 
+  then ⟨j.1, relabel_inequality_lower_case m k h j H⟩ 
   else ⟨j.1 - 1, downward_ineq j.1 m j.2 sorry⟩
 
 
