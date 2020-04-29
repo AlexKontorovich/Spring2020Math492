@@ -156,16 +156,37 @@ begin
 end
 
 
-/--
-`unprovable_here` This lemma is obvious but not provable with how lean handles subtraction. 
--/
-lemma unprovable_here
-{x y : ℕ}
-(p: x - 1 = y - 1)
-: x = y
-:= 
+
+lemma ge_zero_witness_k
+(n k : ℕ )
+(p : k ≥ 0)
+(p3 : n > k)
+: n > 0
+:=
 begin
-  exact nat.pred_inj sorry sorry p,
+exact lt_of_le_of_lt p p3,
+end
+
+
+lemma ge_zero
+(k : ℕ)
+: k ≥ 0
+:= begin
+exact bot_le,
+end
+
+lemma minus_one_both_sides_eq
+{n m k : ℕ }
+(p : k ≥ 0)
+(p2 : m > k)
+(p3 : n > k)
+(p4: m - 1 = n - 1)
+: m = n 
+:=
+begin
+have m_ge_zero  := (ge_zero_witness_k m k p p2),
+have n_ge_zero := (ge_zero_witness_k n k p p3), 
+exact nat.pred_inj m_ge_zero n_ge_zero p4,
 end
 
 /--
@@ -339,13 +360,20 @@ begin
     let comp_inj := comp_inj_is_inj (lift_one (m + 1)) f (lift_one_injective (m + 1)) inj,
 
     rw ext_iff at h, 
-    have h_jump := unprovable_here h, 
-    rw ← ext_iff at h_jump, 
+
+    let k_ge_zero := ge_zero (f ⟨ m + 1, succ_greater_than_nat (m + 1)⟩).val,
+    let h_final := minus_one_both_sides_eq k_ge_zero h1_strict h2_strict h,
+    rw ← ext_iff at h_final, 
     apply comp_inj,
-    apply h_jump,
+    apply h_final,
   },
 
 end
+
+
+
+
+
 
 /--
 `pigeonhole_principle` The pigeonhole principle, which states
